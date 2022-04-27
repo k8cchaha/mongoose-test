@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/k8cchaha/mongoose-test/issues"
   },
-  "homepage": "https://github.com/k8cchaha/mongoose-test#readme"
+  "homepage": "https://github.com/k8cchaha/mongoose-test#readme",
+  "dependencies": {
+    "mongoose": "^6.3.1"
+  }
 }

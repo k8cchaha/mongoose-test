@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/k8cchaha/mongoose-test#readme",
   "dependencies": {
+    "dotenv": "^16.0.0",
     "mongoose": "^6.3.1"
   }
 }

@@ -1,11 +1,17 @@
 const http = require("http");
 const mongoose = require("mongoose");
 const Room = require("./models/room");
+const dotenv = require("dotenv");
+
+dotenv.config({ path: "./config.env" });
+
+const DB = process.env.DATABASE.replace(
+  "<password>",
+  process.env.DATABASE_PASSWORD
+);
 
 mongoose
-  .connect(
-    "mongodb+srv://k8cchaha:nba9999@cluster1.uq0nt.mongodb.net/hotel?retryWrites=true&w=majority"
-  )
+  .connect(DB)
   // .connect("mongodb://localhost:27017/hotel")
   .then(() => {
     console.log("成功連線");
@@ -118,4 +124,4 @@ const requestListener = async (req, res) => {
 };
 
 const server = http.createServer(requestListener);
-server.listen(3005);
+server.listen(process.env.PORT);

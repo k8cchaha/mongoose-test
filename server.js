@@ -1,5 +1,6 @@
 const http = require("http");
 const mongoose = require("mongoose");
+const Room = require("./models/room");
 
 mongoose
   .connect("mongodb://localhost:27017/hotel")
@@ -10,20 +11,9 @@ mongoose
     console.log(err);
   });
 
-const roomSchema = {
-  name: String,
-  price: {
-    type: Number,
-    require: [true, "價格必填"],
-  },
-  rating: Number,
-};
-
-const Room = mongoose.model("Room", roomSchema);
-
 const testRoom = new Room({
-  name: "超級單人房",
-  price: 3000,
+  name: "超級單人房3",
+  price: 4000,
   rating: 4.4,
 });
 

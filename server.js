@@ -3,7 +3,10 @@ const mongoose = require("mongoose");
 const Room = require("./models/room");
 
 mongoose
-  .connect("mongodb://localhost:27017/hotel")
+  .connect(
+    "mongodb+srv://k8cchaha:nba9999@cluster1.uq0nt.mongodb.net/hotel?retryWrites=true&w=majority"
+  )
+  // .connect("mongodb://localhost:27017/hotel")
   .then(() => {
     console.log("成功連線");
   })
@@ -11,24 +14,107 @@ mongoose
     console.log(err);
   });
 
-const testRoom = new Room({
-  name: "超級單人房3",
-  price: 4000,
-  rating: 4.4,
-});
-
-testRoom
-  .save()
-  .then(() => {
-    console.log("新增成功");
-  })
-  .catch((error) => {
-    console.log(error);
+const requestListener = async (req, res) => {
+  let body = "";
+  req.on("data", (chunk) => {
+    body += chunk;
   });
-
-const requestListener = (req, res) => {
-  console.log(req.url);
-  res.end();
+  const headers = {
+    "Access-Control-Allow-Headers":
+      "Content-Type, Authorization, Content-Length, X-Requested-With",
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "PATCH, POST, GET,OPTIONS,DELETE",
+    "Content-Type": "application/json",
+  };
+  if (req.url == "/rooms" && req.method == "GET") {
+    const rooms = await Room.find();
+    res.writeHead(200, headers);
+    res.write(
+      JSON.stringify({
+        status: "success",
+        rooms,
+      })
+    );
+    res.end();
+  } else if (req.url == "/rooms" && req.method == "POST") {
+    req.on("end", async () => {
+      try {
+        const data = JSON.parse(body);
+        const newRoom = await Room.create({
+          name: data.name,
+          price: data.price,
+          rating: data.rating,
+        });
+        res.writeHead(200, headers);
+        res.write(
+          JSON.stringify({
+            status: "success",
+            rooms: newRoom,
+          })
+        );
+        res.end();
+      } catch (error) {
+        res.writeHead(200, headers);
+        res.write(
+          JSON.stringify({
+            status: "success",
+            message: "欄位有錯, 或沒有此ID",
+            error,
+          })
+        );
+        res.end();
+      }
+    });
+  } else if (req.url == "/rooms" && req.method == "DELETE") {
+    await Room.deleteMany({});
+    res.writeHead(200, headers);
+    res.write(
+      JSON.stringify({
+        status: "success",
+        rooms: [],
+      })
+    );
+    res.end();
+  } else if (req.url.startsWith("/rooms/") && req.method == "DELETE") {
+    const id = req.url.split("/").pop();
+    const newRoom = await Room.findByIdAndDelete(id);
+    res.writeHead(200, headers);
+    res.write(
+      JSON.stringify({
+        status: "success",
+        rooms: newRoom,
+      })
+    );
+    res.end();
+  } else if (req.url.startsWith("/rooms/") && req.method == "PATCH") {
+    req.on("end", async () => {
+      try {
+        const id = req.url.split("/").pop();
+        const data = JSON.parse(body);
+        const newRoom = await Room.findByIdAndUpdate(id, data);
+        res.writeHead(200, headers);
+        res.write(
+          JSON.stringify({
+            status: "success",
+            rooms: newRoom,
+          })
+        );
+        res.end();
+      } catch (error) {}
+    });
+  } else if (req.method == "OPTIONS") {
+    res.writeHead(200, headers);
+    res.end();
+  } else {
+    res.writeHead(404, headers);
+    res.write(
+      JSON.stringify({
+        status: "false",
+        message: "無此網站路由",
+      })
+    );
+    res.end();
+  }
 };
 
 const server = http.createServer(requestListener);
